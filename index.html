@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chicago 26">
+<meta name="theme-color" content="#0B1015">
+<title>Chicago 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B1015; --slate:#161E27; --line:#26313D;
+  --paper:#E8EDF2; --mute:#7A8899;
+  --lake:#2E9BD6;      /* azul lago Michigan */
+  --flag:#C8102E;      /* rojo bandera Chicago */
+  --gold:#E4B429;      /* estrella */
+  --moss:#4FB477;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--ink)}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--ink); color:var(--paper);
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  overscroll-behavior-y:contain;
+}
+
+/* ---------- HEADER ---------- */
+.hd{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,var(--ink) 70%,rgba(11,16,21,.92));
+  backdrop-filter:blur(12px);
+  padding:calc(14px + env(safe-area-inset-top)) 18px 12px;
+  border-bottom:1px solid var(--line);
+}
+.hd-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.hd h1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  line-height:.95;
+}
+.hd h1 em{font-style:normal;color:var(--lake)}
+.stars{display:flex;gap:3px;margin-top:5px}
+.star{width:9px;height:9px;background:var(--flag);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.cd{text-align:right;flex-shrink:0}
+.cd-n{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:var(--gold);line-height:1}
+.cd-l{font-size:9px;color:var(--mute);text-transform:uppercase;letter-spacing:.14em;margin-top:3px}
+
+/* ---------- TABS ---------- */
+.tabs{
+  position:fixed;bottom:0;left:0;right:0;z-index:60;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  background:rgba(22,30,39,.96);backdrop-filter:blur(20px);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tab{
+  background:none;border:none;color:var(--mute);
+  padding:13px 4px 12px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:color .18s;position:relative;
+}
+.tab svg{width:19px;height:19px;stroke-width:1.8}
+.tab.on{color:var(--paper)}
+.tab.on::before{content:'';position:absolute;top:0;left:22%;right:22%;height:2px;background:var(--lake)}
+
+/* ---------- LAYOUT ---------- */
+.view{display:none;padding:16px 14px 20px;animation:fade .25s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.eyebrow{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mute);margin:22px 2px 9px;display:flex;align-items:center;gap:9px;
+}
+.eyebrow::after{content:'';flex:1;height:1px;background:var(--line)}
+.eyebrow:first-child{margin-top:2px}
+
+/* ---------- CARD PRINCIPAL ---------- */
+.hero{
+  background:var(--slate);border:1px solid var(--line);border-radius:14px;
+  padding:18px;position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--lake)}
+.hero.q::before{background:var(--flag)}
+.hero.lr::before{background:var(--gold)}
+.hero.off::before{background:var(--line)}
+.hero.race::before{background:linear-gradient(180deg,var(--flag),var(--gold),var(--lake))}
+
+.h-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.pill{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;background:rgba(46,155,214,.16);color:var(--lake);
+}
+.pill.q{background:rgba(200,16,46,.18);color:#F26B7F}
+.pill.lr{background:rgba(228,180,41,.16);color:var(--gold)}
+.pill.off{background:rgba(122,136,153,.14);color:var(--mute)}
+.h-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mute);letter-spacing:.06em}
+
+.h-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:31px;font-weight:700;letter-spacing:.01em;line-height:1.02;margin-bottom:10px;
+}
+.h-detail{font-size:14px;line-height:1.55;color:#C3CDD8}
+
+.h-stats{display:flex;gap:22px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line)}
+.st-n{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700;line-height:1}
+.st-l{font-size:9px;color:var(--mute);text-transform:uppercase;letter-spacing:.13em;margin-top:4px}
+
+/* ---------- BLOQUES ---------- */
+.blk{
+  background:var(--slate);border:1px solid var(--line);border-radius:12px;
+  padding:15px;margin-bottom:10px;
+}
+.blk-h{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--paper);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.blk-h span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--mute);letter-spacing:.06em;font-weight:400;margin-left:auto}
+
+/* ejercicios */
+.ex{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 0;border-bottom:1px solid rgba(38,49,61,.6);
+}
+.ex:last-child{border-bottom:none;padding-bottom:0}
+.ex-n{flex:1;min-width:0}
+.ex-name{font-size:13.5px;font-weight:500;line-height:1.3}
+.ex-set{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mute);margin-top:2px}
+.ex-v{
+  flex-shrink:0;width:32px;height:32px;border-radius:8px;
+  background:rgba(46,155,214,.12);border:1px solid rgba(46,155,214,.28);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--lake);text-decoration:none;transition:all .15s;
+}
+.ex-v:active{background:rgba(46,155,214,.3);transform:scale(.93)}
+.ex-v svg{width:14px;height:14px}
+
+.nut{font-size:13px;line-height:1.65;color:#C3CDD8}
+.nut b{color:var(--gold);font-weight:600}
+
+/* ---------- SEMANA ---------- */
+.wk-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.wk-btn{
+  background:var(--slate);border:1px solid var(--line);color:var(--paper);
+  width:40px;height:40px;border-radius:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.wk-btn:active{background:var(--line)}
+.wk-btn:disabled{opacity:.3}
+.wk-btn svg{width:17px;height:17px}
+.wk-info{text-align:center;flex:1}
+.wk-n{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+.wk-f{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mute);margin-top:4px;letter-spacing:.05em}
+
+.wk-sum{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;
+}
+.wk-c{background:var(--slate);border:1px solid var(--line);border-radius:10px;padding:12px 10px;text-align:center}
+.wk-c-n{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700}
+.wk-c-l{font-size:8.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.11em;margin-top:4px}
+
+.day{
+  display:flex;gap:12px;padding:13px 14px;
+  background:var(--slate);border:1px solid var(--line);border-radius:11px;
+  margin-bottom:7px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+}
+.day::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lake)}
+.day.q::before{background:var(--flag)}
+.day.lr::before{background:var(--gold)}
+.day.off::before{background:var(--line)}
+.day.race::before{background:linear-gradient(180deg,var(--flag),var(--gold))}
+.day:active{background:#1B242F}
+.day.today{border-color:var(--lake);box-shadow:0 0 0 1px rgba(46,155,214,.3)}
+.day-l{width:34px;flex-shrink:0;text-align:center}
+.day-d{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.day-n{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;margin-top:1px}
+.day-c{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.day-t{font-size:14px;font-weight:600;line-height:1.25}
+.day-s{font-size:11px;color:var(--mute);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day-km{
+  font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;
+  align-self:center;flex-shrink:0;color:var(--lake);
+}
+.day.off .day-km{color:var(--mute);font-size:12px}
+
+/* ---------- PROGRESO ---------- */
+.pg-hero{
+  background:var(--slate);border:1px solid var(--line);border-radius:14px;
+  padding:20px;text-align:center;margin-bottom:12px;
+}
+.pg-big{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;color:var(--lake);line-height:1}
+.pg-sub{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.14em;margin-top:7px}
+.bar{height:7px;background:var(--ink);border-radius:4px;overflow:hidden;margin-top:16px;border:1px solid var(--line)}
+.bar-f{height:100%;background:linear-gradient(90deg,var(--lake),var(--moss));border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.mini{background:var(--slate);border:1px solid var(--line);border-radius:11px;padding:14px}
+.mini-n{font-family:'JetBrains Mono',monospace;font-size:23px;font-weight:700}
+.mini-l{font-size:9px;color:var(--mute);text-transform:uppercase;letter-spacing:.12em;margin-top:5px;line-height:1.3}
+
+/* chart volumen */
+.chart{background:var(--slate);border:1px solid var(--line);border-radius:12px;padding:16px 14px 12px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px;margin-bottom:8px}
+.bcol{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;gap:4px}
+.bfill{width:100%;border-radius:3px 3px 0 0;background:var(--lake);opacity:.55;transition:all .3s;min-height:3px}
+.bcol.now .bfill{opacity:1;background:var(--gold)}
+.bcol.done .bfill{opacity:.85;background:var(--moss)}
+.bcol.taper .bfill{background:var(--mute)}
+.blab{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--mute)}
+.bval{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--paper);font-weight:700}
+
+/* ritmos */
+.rit{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(38,49,61,.6)}
+.rit:last-child{border-bottom:none;padding-bottom:0}
+.rit-k{display:flex;align-items:center;gap:10px}
+.rit-b{
+  width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;flex-shrink:0;
+}
+.rit-n{font-size:13px;font-weight:500}
+.rit-d{font-size:10px;color:var(--mute);margin-top:1px}
+.rit-v{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700}
+
+/* modal */
+.ov{
+  position:fixed;inset:0;background:rgba(11,16,21,.85);backdrop-filter:blur(6px);
+  z-index:100;display:none;align-items:flex-end;
+}
+.ov.on{display:flex;animation:fade .2s}
+.sheet{
+  background:var(--slate);border-top:1px solid var(--line);
+  border-radius:20px 20px 0 0;width:100%;max-height:88vh;overflow-y:auto;
+  padding:8px 16px calc(28px + env(safe-area-inset-bottom));
+  animation:up .28s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.grab{width:36px;height:4px;background:var(--line);border-radius:2px;margin:6px auto 16px}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="hd-top">
+    <div>
+      <h1>Chicago <em>2026</em></h1>
+      <div class="stars"><i class="star"></i><i class="star"></i><i class="star"></i><i class="star"></i></div>
+    </div>
+    <div class="cd">
+      <div class="cd-n" id="cdN">--</div>
+      <div class="cd-l">días</div>
+    </div>
+  </div>
+</div>
+
+<div class="view on" id="v-hoy"></div>
+<div class="view" id="v-sem"></div>
+<div class="view" id="v-pro"></div>
+
+<nav class="tabs">
+  <button class="tab on" data-v="hoy">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    Hoy
+  </button>
+  <button class="tab" data-v="sem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+    Semana
+  </button>
+  <button class="tab" data-v="pro">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l5-6 4 4 5-8 4 5"/><path d="M3 21h18"/></svg>
+    Progreso
+  </button>
+</nav>
+
+<div class="ov" id="ov"><div class="sheet"><div class="grab"></div><div id="sheetC"></div></div></div>
+
+<script>
+const P = [{"s":1,"fase":"Reconstruccion","f":"2026-07-20","d":"Lunes","v":50,"t":"Easy 8km","det":"8km @ 5:35-6:15 (Z2). Sin mirar reloj.","km":8,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":1,"fase":"Reconstruccion","f":"2026-07-21","d":"Martes","v":50,"t":"Zwift Z2 45min","det":"Bici 45min @ FC 119-137, cadencia 85-90rpm","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":1,"fase":"Reconstruccion","f":"2026-07-22","d":"Miercoles","v":50,"t":"Easy 8km","det":"8km @ 5:35-6:15","km":8,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":1,"fase":"Reconstruccion","f":"2026-07-23","d":"Jueves","v":50,"t":"OFF running","det":"Solo gym + KB","km":0,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20 | KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":1,"fase":"Reconstruccion","f":"2026-07-24","d":"Viernes","v":50,"t":"Easy 8km + strides","det":"8km @ 5:35-6:15 + 6x20seg strides @ 3:53 rec completa","km":8,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"}]},{"s":1,"fase":"Reconstruccion","f":"2026-07-25","d":"Sabado","v":50,"t":"OFF","det":"Descanso total o caminata","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":1,"fase":"Reconstruccion","f":"2026-07-26","d":"Domingo","v":50,"t":"LONG RUN 14km","det":"14km @ 5:35-6:15. Ritmo conversacional TODO el tiempo.","km":14,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":2,"fase":"Reconstruccion","f":"2026-07-27","d":"Lunes","v":50,"t":"THRESHOLD 2x10min","det":"2km cal @ 5:35-6:15 + 2x10min @ 4:36 (rec 2min trote) + 2km enf. Total ~10km","km":10,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":2,"fase":"Reconstruccion","f":"2026-07-28","d":"Martes","v":50,"t":"Zwift Z2 50min","det":"Bici 50min @ FC 119-137, cadencia 85-90rpm","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":2,"fase":"Reconstruccion","f":"2026-07-29","d":"Miercoles","v":50,"t":"Easy 9km","det":"9km @ 5:35-6:15","km":9,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":2,"fase":"Reconstruccion","f":"2026-07-30","d":"Jueves","v":50,"t":"OFF running","det":"Gym + KB","km":0,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20 | KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":2,"fase":"Reconstruccion","f":"2026-07-31","d":"Viernes","v":50,"t":"Easy 9km + strides","det":"9km @ 5:35-6:15 + 6x20seg @ 3:53","km":9,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20 | PLIOMETRIA (15min): Saltos caja 4x8 | Skipping A 4x30m | Bounding 4x20m | Saltos 1 pierna 3x10/lado | Pogo jumps 3x20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"},{"n":"PLIOMETRIA (15min): Saltos caja","s":"4x8","b":"TORSO","v":"https://www.youtube.com/results?search_query=box+jump+pliometria+tecnica"},{"n":"Skipping A","s":"4x30m","b":"TORSO","v":"https://www.youtube.com/results?search_query=skipping+A+tecnica+correr"},{"n":"Bounding","s":"4x20m","b":"TORSO","v":"https://www.youtube.com/results?search_query=bounding+drill+running"},{"n":"Saltos 1 pierna","s":"3x10/lado","b":"TORSO","v":"https://www.youtube.com/results?search_query=single+leg+hop+pliometria"},{"n":"Pogo jumps","s":"3x20","b":"TORSO","v":"https://www.youtube.com/results?search_query=pogo+jumps+pliometria+running"}]},{"s":2,"fase":"Reconstruccion","f":"2026-08-01","d":"Sabado","v":50,"t":"OFF","det":"Descanso","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":2,"fase":"Reconstruccion","f":"2026-08-02","d":"Domingo","v":50,"t":"LONG RUN 17km","det":"17km @ 5:35-6:15","km":17,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":3,"fase":"Base","f":"2026-08-03","d":"Lunes","v":51,"t":"THRESHOLD 3x10min","det":"2km cal + 3x10min @ 4:31 (rec 2min) + 2km enf. Total ~12km","km":12,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":3,"fase":"Base","f":"2026-08-04","d":"Martes","v":51,"t":"Zwift Z2 60min","det":"Bici 60min @ FC 119-137, cadencia 85-90rpm","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":3,"fase":"Base","f":"2026-08-05","d":"Miercoles","v":51,"t":"Easy 9km","det":"9km @ 5:30-6:10","km":9,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":3,"fase":"Base","f":"2026-08-06","d":"Jueves","v":51,"t":"OFF running","det":"Gym + KB","km":0,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20 | KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":3,"fase":"Base","f":"2026-08-07","d":"Viernes","v":51,"t":"Easy 9km + strides","det":"9km @ 5:30-6:10 + 8x20seg @ 3:49","km":9,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20 | PLIOMETRIA (15min): Saltos caja 4x8 | Skipping A 4x30m | Bounding 4x20m | Saltos 1 pierna 3x10/lado | Pogo jumps 3x20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"},{"n":"PLIOMETRIA (15min): Saltos caja","s":"4x8","b":"TORSO","v":"https://www.youtube.com/results?search_query=box+jump+pliometria+tecnica"},{"n":"Skipping A","s":"4x30m","b":"TORSO","v":"https://www.youtube.com/results?search_query=skipping+A+tecnica+correr"},{"n":"Bounding","s":"4x20m","b":"TORSO","v":"https://www.youtube.com/results?search_query=bounding+drill+running"},{"n":"Saltos 1 pierna","s":"3x10/lado","b":"TORSO","v":"https://www.youtube.com/results?search_query=single+leg+hop+pliometria"},{"n":"Pogo jumps","s":"3x20","b":"TORSO","v":"https://www.youtube.com/results?search_query=pogo+jumps+pliometria+running"}]},{"s":3,"fase":"Base","f":"2026-08-08","d":"Sabado","v":51,"t":"OFF","det":"Descanso","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":3,"fase":"Base","f":"2026-08-09","d":"Domingo","v":51,"t":"LONG RUN 20km","det":"20km: 15km @ 5:30-6:10 + 5km final @ 4:47","km":20,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":4,"fase":"Descarga","f":"2026-08-10","d":"Lunes","v":51,"t":"THRESHOLD 2x12min","det":"2km cal + 2x12min @ 4:31 (rec 2min) + 2km enf. ~11km","km":11,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":4,"fase":"Descarga","f":"2026-08-11","d":"Martes","v":51,"t":"Zwift Z2 45min","det":"Bici recuperacion 45min","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":4,"fase":"Descarga","f":"2026-08-12","d":"Miercoles","v":51,"t":"Easy 9km","det":"9km @ 5:30-6:10","km":9,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":4,"fase":"Descarga","f":"2026-08-13","d":"Jueves","v":51,"t":"OFF running","det":"Gym + KB","km":0,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20 | KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":4,"fase":"Descarga","f":"2026-08-14","d":"Viernes","v":51,"t":"Easy 9km","det":"9km @ 5:30-6:10 + 6x20seg @ 3:49","km":9,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"}]},{"s":4,"fase":"Descarga","f":"2026-08-15","d":"Sabado","v":51,"t":"OFF","det":"Descanso total","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":4,"fase":"Descarga","f":"2026-08-16","d":"Domingo","v":51,"t":"LONG RUN 16km","det":"16km @ 5:30-6:10 relajado","km":16,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":5,"fase":"Base","f":"2026-08-17","d":"Lunes","v":51,"t":"INTERVALOS 5x1000","det":"3km cal + 5x1000m @ 4:09 (rec 3min trote) + 2km enf. ~11km","km":11,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":5,"fase":"Base","f":"2026-08-18","d":"Martes","v":51,"t":"Zwift Z2 60min","det":"Bici 60min Z2, cadencia 85-90","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":5,"fase":"Base","f":"2026-08-19","d":"Miercoles","v":51,"t":"Easy 10km","det":"10km @ 5:30-6:10","km":10,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":5,"fase":"Base","f":"2026-08-20","d":"Jueves","v":51,"t":"Easy 8km","det":"8km @ 5:30-6:10 suave","km":8,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"}]},{"s":5,"fase":"Base","f":"2026-08-21","d":"Viernes","v":51,"t":"TEMPO 6km","det":"3km cal + 6km @ 4:31 continuo + 2km enf. ~11km","km":11,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"}]},{"s":5,"fase":"Base","f":"2026-08-22","d":"Sabado","v":51,"t":"OFF","det":"Descanso + KB","km":0,"gym":"KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":5,"fase":"Base","f":"2026-08-23","d":"Domingo","v":51,"t":"LONG RUN 18km","det":"18km: 14km @ 5:30-6:10 + 4km @ 4:47","km":18,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":6,"fase":"Base","f":"2026-08-24","d":"Lunes","v":52,"t":"INTERVALOS 6x1000","det":"3km cal + 6x1000m @ 4:05 (rec 3min) + 2km enf. ~12km","km":12,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":6,"fase":"Base","f":"2026-08-25","d":"Martes","v":52,"t":"Zwift Z2 60min","det":"Bici 60min Z2","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":6,"fase":"Base","f":"2026-08-26","d":"Miercoles","v":52,"t":"Easy 11km","det":"11km @ 5:25-6:04","km":11,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":6,"fase":"Base","f":"2026-08-27","d":"Jueves","v":52,"t":"Easy 9km","det":"9km @ 5:25-6:04","km":9,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"}]},{"s":6,"fase":"Base","f":"2026-08-28","d":"Viernes","v":52,"t":"TEMPO 8km","det":"3km cal + 8km @ 4:27 + 2km enf. ~13km","km":13,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20 | PLIOMETRIA (15min): Saltos caja 4x8 | Skipping A 4x30m | Bounding 4x20m | Saltos 1 pierna 3x10/lado | Pogo jumps 3x20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"},{"n":"PLIOMETRIA (15min): Saltos caja","s":"4x8","b":"TORSO","v":"https://www.youtube.com/results?search_query=box+jump+pliometria+tecnica"},{"n":"Skipping A","s":"4x30m","b":"TORSO","v":"https://www.youtube.com/results?search_query=skipping+A+tecnica+correr"},{"n":"Bounding","s":"4x20m","b":"TORSO","v":"https://www.youtube.com/results?search_query=bounding+drill+running"},{"n":"Saltos 1 pierna","s":"3x10/lado","b":"TORSO","v":"https://www.youtube.com/results?search_query=single+leg+hop+pliometria"},{"n":"Pogo jumps","s":"3x20","b":"TORSO","v":"https://www.youtube.com/results?search_query=pogo+jumps+pliometria+running"}]},{"s":6,"fase":"Base","f":"2026-08-29","d":"Sabado","v":52,"t":"OFF","det":"Descanso + KB","km":0,"gym":"KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":6,"fase":"Base","f":"2026-08-30","d":"Domingo","v":52,"t":"LONG RUN 22km","det":"22km: 17km @ 5:25-6:04 + 5km @ 4:42","km":22,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":7,"fase":"Especifico","f":"2026-08-31","d":"Lunes","v":52,"t":"INTERVALOS 5x1200","det":"3km cal + 5x1200m @ 4:05 (rec 3min) + 2km enf. ~13km","km":13,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":7,"fase":"Especifico","f":"2026-09-01","d":"Martes","v":52,"t":"Zwift Z2 70min","det":"Bici 70min Z2","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":7,"fase":"Especifico","f":"2026-09-02","d":"Miercoles","v":52,"t":"Easy 11km","det":"11km @ 5:25-6:04","km":11,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":7,"fase":"Especifico","f":"2026-09-03","d":"Jueves","v":52,"t":"Easy 9km","det":"9km @ 5:25-6:04","km":9,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"}]},{"s":7,"fase":"Especifico","f":"2026-09-04","d":"Viernes","v":52,"t":"TEMPO 8km","det":"3km cal + 8km @ 4:27 + 2km enf. ~13km","km":13,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20 | PLIOMETRIA (15min): Saltos caja 4x8 | Skipping A 4x30m | Bounding 4x20m | Saltos 1 pierna 3x10/lado | Pogo jumps 3x20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"},{"n":"PLIOMETRIA (15min): Saltos caja","s":"4x8","b":"TORSO","v":"https://www.youtube.com/results?search_query=box+jump+pliometria+tecnica"},{"n":"Skipping A","s":"4x30m","b":"TORSO","v":"https://www.youtube.com/results?search_query=skipping+A+tecnica+correr"},{"n":"Bounding","s":"4x20m","b":"TORSO","v":"https://www.youtube.com/results?search_query=bounding+drill+running"},{"n":"Saltos 1 pierna","s":"3x10/lado","b":"TORSO","v":"https://www.youtube.com/results?search_query=single+leg+hop+pliometria"},{"n":"Pogo jumps","s":"3x20","b":"TORSO","v":"https://www.youtube.com/results?search_query=pogo+jumps+pliometria+running"}]},{"s":7,"fase":"Especifico","f":"2026-09-05","d":"Sabado","v":52,"t":"OFF","det":"Descanso total","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":7,"fase":"Especifico","f":"2026-09-06","d":"Domingo","v":52,"t":"LONG RUN 26km","det":"26km: 20km @ 5:25-6:04 + 6km @ 4:42. PROBAR NUTRICION COMPLETA.","km":26,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":8,"fase":"Descarga","f":"2026-09-07","d":"Lunes","v":53,"t":"THRESHOLD 4x8min","det":"3km cal + 4x8min @ 4:22 (rec 90seg) + 2km enf. ~11km","km":11,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":8,"fase":"Descarga","f":"2026-09-08","d":"Martes","v":53,"t":"Zwift Z2 50min","det":"Bici recuperacion","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":8,"fase":"Descarga","f":"2026-09-09","d":"Miercoles","v":53,"t":"Easy 10km","det":"10km @ 5:20-5:59","km":10,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":8,"fase":"Descarga","f":"2026-09-10","d":"Jueves","v":53,"t":"Easy 8km","det":"8km @ 5:20-5:59","km":8,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"}]},{"s":8,"fase":"Descarga","f":"2026-09-11","d":"Viernes","v":53,"t":"Easy 8km + strides","det":"8km @ 5:20-5:59 + 8x20seg @ 3:41","km":8,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"}]},{"s":8,"fase":"Descarga","f":"2026-09-12","d":"Sabado","v":53,"t":"OFF","det":"Descanso + KB","km":0,"gym":"KETTLEBELLS (25min): Swings 5x20 | Cleans 4x10/lado | Thrusters 4x10 | Turkish get-up 3x5/lado | Farmer walk 3x40m","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"KETTLEBELLS (25min): Swings","s":"5x20","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+swing+tecnica"},{"n":"Cleans","s":"4x10/lado","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+clean+tecnica"},{"n":"Thrusters","s":"4x10","b":"","v":"https://www.youtube.com/results?search_query=kettlebell+thruster+tecnica"},{"n":"Turkish get-up","s":"3x5/lado","b":"","v":"https://www.youtube.com/results?search_query=turkish+get+up+kettlebell"},{"n":"Farmer walk","s":"3x40m","b":"","v":"https://www.youtube.com/results?search_query=farmer+walk+kettlebell"}]},{"s":8,"fase":"Descarga","f":"2026-09-13","d":"Domingo","v":53,"t":"LONG RUN 18km","det":"18km @ 5:20-5:59","km":18,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":9,"fase":"Especifico","f":"2026-09-14","d":"Lunes","v":53,"t":"INTERVALOS 6x1000","det":"3km cal + 6x1000m @ 4:01 (rec 3min) + 2km enf. ~12km","km":12,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":9,"fase":"Especifico","f":"2026-09-15","d":"Martes","v":53,"t":"Zwift Z2 70min","det":"Bici 70min Z2","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":9,"fase":"Especifico","f":"2026-09-16","d":"Miercoles","v":53,"t":"Easy 10km","det":"10km @ 5:20-5:59","km":10,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":9,"fase":"Especifico","f":"2026-09-17","d":"Jueves","v":53,"t":"Easy 8km","det":"8km @ 5:20-5:59","km":8,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"}]},{"s":9,"fase":"Especifico","f":"2026-09-18","d":"Viernes","v":53,"t":"RITMO MARATON 8km","det":"3km cal + 8km @ 4:37 + 2km enf. ~13km. SIMULACRO.","km":13,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"}]},{"s":9,"fase":"Especifico","f":"2026-09-19","d":"Sabado","v":53,"t":"OFF","det":"Descanso total","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":9,"fase":"Especifico","f":"2026-09-20","d":"Domingo","v":53,"t":"LONG RUN 32km","det":"32km: 24km @ 5:20-5:59 + 8km @ 4:37. ENSAYO GENERAL COMPLETO.","km":32,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":10,"fase":"Especifico","f":"2026-09-21","d":"Lunes","v":54,"t":"INTERVALOS 5x1000","det":"3km cal + 5x1000m @ 3:57 (rec 3min) + 2km enf. ~11km","km":11,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":10,"fase":"Especifico","f":"2026-09-22","d":"Martes","v":54,"t":"Zwift Z2 60min","det":"Bici 60min Z2","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":10,"fase":"Especifico","f":"2026-09-23","d":"Miercoles","v":54,"t":"Easy 10km","det":"10km @ 5:15-5:54","km":10,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":10,"fase":"Especifico","f":"2026-09-24","d":"Jueves","v":54,"t":"Easy 8km","det":"8km @ 5:15-5:54","km":8,"gym":"PIERNA 2: Hip thrust 3x(3-5/10-12) RIR3 | Press pierna 3x12-15 | Curl isquios 1 pierna 3x15-20+RP | Bulgara 3x12-15+RP | Aductores 3x15-20 | Elev talones 3x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Hip thrust","s":"3x(3-5/10-12) RIR3","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=hip+thrust+barra+tecnica"},{"n":"Press pierna","s":"3x12-15","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=prensa+de+pierna+tecnica"},{"n":"Curl isquios 1 pierna","s":"3x15-20+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Bulgara","s":"3x12-15+RP","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=sentadilla+bulgara+tecnica"},{"n":"Aductores","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 2","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"}]},{"s":10,"fase":"Especifico","f":"2026-09-25","d":"Viernes","v":54,"t":"RITMO MARATON 10km","det":"3km cal + 10km @ 4:33 + 2km enf. ~15km","km":15,"gym":"TORSO: Press hombro 3x(3-5/10-12) RIR3 | Curl martillo 3x15-20 | Elev lateral polea 3x15-20+RP | Fly posterior 3x15-20 | Ext triceps 3x12-15+DS | Tate press 3x12-15 | Abs 2x15-20","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press hombro","s":"3x(3-5/10-12) RIR3","b":"TORSO","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Curl martillo","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=curl+martillo+mancuerna"},{"n":"Elev lateral polea","s":"3x15-20+RP","b":"TORSO","v":"https://www.youtube.com/results?search_query=elevacion+lateral+polea+una+mano"},{"n":"Fly posterior","s":"3x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=fly+posterior+polea+deltoide"},{"n":"Ext triceps","s":"3x12-15+DS","b":"TORSO","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta"},{"n":"Tate press","s":"3x12-15","b":"TORSO","v":"https://www.youtube.com/results?search_query=tate+press+mancuerna+triceps"},{"n":"Abs","s":"2x15-20","b":"TORSO","v":"https://www.youtube.com/results?search_query=abdominales+crunch+tecnica"}]},{"s":10,"fase":"Especifico","f":"2026-09-26","d":"Sabado","v":54,"t":"OFF","det":"Descanso","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":10,"fase":"Especifico","f":"2026-09-27","d":"Domingo","v":54,"t":"LONG RUN 21km","det":"21km: 14km @ 5:15-5:54 + 7km @ 4:33","km":21,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]},{"s":11,"fase":"Taper","f":"2026-09-28","d":"Lunes","v":54,"t":"THRESHOLD 3x8min","det":"3km cal + 3x8min @ 4:18 (rec 2min) + 2km enf. ~10km","km":10,"gym":"EMPUJES: Press banco 3x(3-5/10-12) RIR3 | Elev laterales 3x15-20 | Ext triceps nuca 3x15-20 | Aperturas 3x15-20+DS | Press hombro 3x12-15 | Ext triceps polea 3x15-20+DS | Plancha 2x1-2min (bajar 30% carga)","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Press banco","s":"3x(3-5/10-12) RIR3","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+banco+plano+barra+tecnica"},{"n":"Elev laterales","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=elevaciones+laterales+mancuernas+tecnica"},{"n":"Ext triceps nuca","s":"3x15-20","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+tras+nuca+polea"},{"n":"Aperturas","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=aperturas+pectoral+polea+tecnica"},{"n":"Press hombro","s":"3x12-15","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=press+hombro+mancuerna+sentado"},{"n":"Ext triceps polea","s":"3x15-20+DS","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=extension+triceps+polea+alta+cuerda"},{"n":"Plancha","s":"2x1-2min (bajar 30% carga)","b":"EMPUJES","v":"https://www.youtube.com/results?search_query=plancha+frontal+abdominal+tecnica"}]},{"s":11,"fase":"Taper","f":"2026-09-29","d":"Martes","v":54,"t":"Zwift Z2 45min","det":"Bici suave","km":0,"gym":"PIERNA 1: Sentadilla 3x(3-5/10-12) RIR3 | Curl isquios 3x15-20 | Ext cuadriceps 3x15-20+RP | Aductores 3x15-20+RP | Elev talones 3x15-20 | Abs polea 2x15-20 (bajar 30%)","nut":"INTRA: agua natural 500ml-1L","ej":[{"n":"Sentadilla","s":"3x(3-5/10-12) RIR3","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=sentadilla+libre+tecnica+correcta"},{"n":"Curl isquios","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=curl+femoral+acostado+maquina"},{"n":"Ext cuadriceps","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=extension+cuadriceps+maquina+tecnica"},{"n":"Aductores","s":"3x15-20+RP","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=aductores+maquina+tecnica"},{"n":"Elev talones","s":"3x15-20","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=elevacion+talones+de+pie+maquina"},{"n":"Abs polea","s":"2x15-20 (bajar 30%)","b":"PIERNA 1","v":"https://www.youtube.com/results?search_query=crunch+abdominal+polea+alta"}]},{"s":11,"fase":"Taper","f":"2026-09-30","d":"Miercoles","v":54,"t":"Easy 8km","det":"8km @ 5:15-5:54","km":8,"gym":"TRACCIONES: Peso muerto 3x(3-5/10-12) RIR3 | Dominadas/Pulldown 3x(3-5/10-12) | Remo 1 mano 3x12-15+RP | Curl predicador 3x15-20 | Curl barra 3x15-20+DS | Curl bayesian 3x15-20 (bajar 30%)","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[{"n":"Peso muerto","s":"3x(3-5/10-12) RIR3","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=peso+muerto+convencional+tecnica"},{"n":"Dominadas/Pulldown","s":"3x(3-5/10-12)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=dominadas+tecnica+correcta"},{"n":"Remo 1 mano","s":"3x12-15+RP","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=remo+una+mano+cable+sentado"},{"n":"Curl predicador","s":"3x15-20","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+predicador+tecnica"},{"n":"Curl barra","s":"3x15-20+DS","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+barra+z+de+pie"},{"n":"Curl bayesian","s":"3x15-20 (bajar 30%)","b":"TRACCIONES","v":"https://www.youtube.com/results?search_query=curl+biceps+bayesian+polea"}]},{"s":11,"fase":"Taper","f":"2026-10-01","d":"Jueves","v":54,"t":"Easy 6km","det":"6km @ 5:15-5:54","km":6,"gym":"OFF - solo movilidad","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":11,"fase":"Taper","f":"2026-10-02","d":"Viernes","v":54,"t":"RITMO MARATON 6km","det":"2km cal + 6km @ 4:33 + 2km enf. ~10km","km":10,"gym":"OFF - solo movilidad","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":11,"fase":"Taper","f":"2026-10-03","d":"Sabado","v":54,"t":"OFF","det":"Descanso total","km":0,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":11,"fase":"Taper","f":"2026-10-04","d":"Domingo","v":54,"t":"LONG RUN 11km","det":"11km: 8km @ 5:15-5:54 + 3km @ 4:33","km":11,"gym":"DESCANSO - solo movilidad 10min + foam roller","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-05","d":"Lunes","v":54,"t":"Easy 8km + strides","det":"8km @ 5:15-5:54 + 6x20seg @ 3:38","km":8,"gym":"OFF - movilidad 15min","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-06","d":"Martes","v":54,"t":"Easy 6km","det":"6km @ 5:15-5:54 muy suave","km":6,"gym":"OFF","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-07","d":"Miercoles","v":54,"t":"RITMO MARATON 5km","det":"2km cal + 5km @ 4:33 + 2km enf. ~9km. Ultimo estimulo.","km":9,"gym":"OFF","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-08","d":"Jueves","v":54,"t":"OFF","det":"Descanso total. Viajar a Chicago.","km":0,"gym":"OFF","nut":"INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-09","d":"Viernes","v":54,"t":"Easy 5km","det":"5km @ 5:15-5:54 + 4x20seg. Reconocer zona de salida.","km":5,"gym":"OFF","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-10","d":"Sabado","v":54,"t":"Trote 3km","det":"3km muy suave + estiramiento. EXPO: caminar lo minimo.","km":3,"gym":"OFF","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: agua natural 500ml-1L","ej":[]},{"s":12,"fase":"Taper/Carrera","f":"2026-10-11","d":"Domingo","v":54,"t":"MARATON CHICAGO","det":"42.2km @ 4:33 objetivo. META SUB 3:00:00","km":42,"gym":"OFF","nut":"PRE (30min antes): 3 dátiles + 15g crema cacahuate + pizca sal + cafe negro | INTRA: gel CarbFuel 50g cada 6km (con sodio el 1ro) + agua sola. NUNCA Gatorade. | INMEDIATO (30min): licuado 2 scoops whey + platano + 500ml agua electrolitos | 2h despues: arroz 230g + proteina 205g","ej":[]}];
+
+const RACE = new Date('2026-10-11T07:30:00');
+const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+const RITMOS = {
+ 50:{E:'5:35-6:15',M:'4:52',T:'4:36',I:'4:13',R:'3:53'},
+ 51:{E:'5:30-6:10',M:'4:47',T:'4:31',I:'4:09',R:'3:49'},
+ 52:{E:'5:25-6:04',M:'4:42',T:'4:27',I:'4:05',R:'3:45'},
+ 53:{E:'5:20-5:59',M:'4:37',T:'4:22',I:'4:01',R:'3:41'},
+ 54:{E:'5:15-5:54',M:'4:33',T:'4:18',I:'3:57',R:'3:38'}
+};
+const RIT_INFO = [
+ ['E','Easy','Rodaje facil, conversacional','#4FB477'],
+ ['M','Maraton','Ritmo objetivo de carrera','#E4B429'],
+ ['T','Threshold','Umbral, comodo-duro','#2E9BD6'],
+ ['I','Intervalo','VO2 max, duro','#C8102E'],
+ ['R','Repeticion','Velocidad, strides','#9B6BD6']
+];
+
+function tipo(d){
+  const t = d.t || '';
+  if(t.includes('MARATON CHICAGO')) return 'race';
+  if(t.includes('LONG RUN')) return 'lr';
+  if(/INTERVALOS|TEMPO|THRESHOLD|RITMO MARATON/.test(t)) return 'q';
+  if(t === 'OFF' || t.includes('OFF running')) return 'off';
+  return '';
+}
+function lbl(k){
+  return {race:'Carrera',lr:'Long run',q:'Calidad',off:'Descanso'}[k] || 'Easy';
+}
+function fmtF(s){
+  const d = new Date(s+'T12:00:00');
+  return `${DIAS[d.getDay()]} ${d.getDate()} ${MES[d.getMonth()]}`;
+}
+function hoyISO(){
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+function idxHoy(){
+  const h = hoyISO();
+  let i = P.findIndex(d => d.f === h);
+  if(i >= 0) return i;
+  i = P.findIndex(d => d.f > h);
+  return i >= 0 ? i : P.length-1;
+}
+
+// countdown
+function cd(){
+  const ms = RACE - new Date();
+  document.getElementById('cdN').textContent = ms > 0 ? Math.ceil(ms/86400000) : '0';
+}
+cd(); setInterval(cd, 60000);
+
+// ============ HOY ============
+function renderHoy(){
+  const i = idxHoy(), d = P[i], k = tipo(d);
+  const r = RITMOS[d.v];
+  let h = '';
+
+  h += `<div class="hero ${k}">
+    <div class="h-meta">
+      <span class="pill ${k}">${lbl(k)}</span>
+      <span class="h-date">${fmtF(d.f)} · Sem ${d.s}</span>
+    </div>
+    <div class="h-title">${d.t}</div>
+    <div class="h-detail">${d.det}</div>
+    <div class="h-stats">
+      ${d.km ? `<div><div class="st-n">${d.km}</div><div class="st-l">km</div></div>` : ''}
+      <div><div class="st-n">${d.v}</div><div class="st-l">VDOT</div></div>
+      <div><div class="st-n" style="font-size:15px;padding-top:4px">${d.fase}</div><div class="st-l">Fase</div></div>
+    </div>
+  </div>`;
+
+  if(d.km){
+    h += `<div class="eyebrow">Ritmos de hoy</div><div class="blk">`;
+    RIT_INFO.forEach(([kk,n,ds,c]) => {
+      h += `<div class="rit"><div class="rit-k">
+        <div class="rit-b" style="background:${c}22;color:${c}">${kk}</div>
+        <div><div class="rit-n">${n}</div><div class="rit-d">${ds}</div></div>
+      </div><div class="rit-v" style="color:${c}">${r[kk]}</div></div>`;
+    });
+    h += `</div>`;
+  }
+
+  if(d.ej && d.ej.length){
+    const bloque = d.ej[0].b || 'Fuerza';
+    h += `<div class="eyebrow">Fuerza</div>
+    <div class="blk"><div class="blk-h">${bloque}<span>${d.ej.length} ejercicios</span></div>`;
+    d.ej.forEach(e => {
+      h += `<div class="ex">
+        <div class="ex-n"><div class="ex-name">${e.n}</div>${e.s?`<div class="ex-set">${e.s}</div>`:''}</div>
+        ${e.v?`<a class="ex-v" href="${e.v}" target="_blank" rel="noopener" aria-label="Ver video de ${e.n}">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a>`:''}
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  h += `<div class="eyebrow">Nutrición</div><div class="blk"><div class="nut">${
+    (d.nut||'').split('|').map(s=>s.trim()).filter(Boolean).map(s=>{
+      const p = s.split(':');
+      return p.length>1 ? `<b>${p[0]}:</b>${p.slice(1).join(':')}` : s;
+    }).join('<br>')
+  }</div></div>`;
+
+  document.getElementById('v-hoy').innerHTML = h;
+}
+
+// ============ SEMANA ============
+let semAct = P[idxHoy()].s;
+function renderSem(){
+  const dd = P.filter(x => x.s === semAct);
+  const km = dd.reduce((a,b)=>a+(b.km||0),0);
+  const cal = dd.filter(x=>tipo(x)==='q').length;
+  const lr = dd.find(x=>tipo(x)==='lr'||tipo(x)==='race');
+  const hoy = hoyISO();
+
+  let h = `<div class="wk-nav">
+    <button class="wk-btn" onclick="chgSem(-1)" ${semAct<=1?'disabled':''}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="wk-info">
+      <div class="wk-n">Semana ${semAct} · ${dd[0].fase}</div>
+      <div class="wk-f">${fmtF(dd[0].f)} — ${fmtF(dd[6].f)}</div>
+    </div>
+    <button class="wk-btn" onclick="chgSem(1)" ${semAct>=12?'disabled':''}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>`;
+
+  h += `<div class="wk-sum">
+    <div class="wk-c"><div class="wk-c-n" style="color:var(--lake)">${km}</div><div class="wk-c-l">km total</div></div>
+    <div class="wk-c"><div class="wk-c-n" style="color:var(--flag)">${cal}</div><div class="wk-c-l">calidad</div></div>
+    <div class="wk-c"><div class="wk-c-n" style="color:var(--gold)">${lr?lr.km:0}</div><div class="wk-c-l">long run</div></div>
+  </div>`;
+
+  dd.forEach((d,ix) => {
+    const k = tipo(d), dt = new Date(d.f+'T12:00:00');
+    h += `<div class="day ${k} ${d.f===hoy?'today':''}" onclick="verDia(${P.indexOf(d)})">
+      <div class="day-l"><div class="day-d">${DIAS[dt.getDay()]}</div><div class="day-n">${dt.getDate()}</div></div>
+      <div class="day-c"><div class="day-t">${d.t}</div><div class="day-s">${d.ej&&d.ej.length?d.ej[0].b:'Sin fuerza'}</div></div>
+      <div class="day-km">${d.km?d.km+'k':'—'}</div>
+    </div>`;
+  });
+
+  document.getElementById('v-sem').innerHTML = h;
+}
+function chgSem(n){ semAct = Math.min(12, Math.max(1, semAct+n)); renderSem(); }
+
+// ============ PROGRESO ============
+function renderPro(){
+  const hoy = hoyISO();
+  const pas = P.filter(d => d.f < hoy);
+  const kmH = pas.reduce((a,b)=>a+(b.km||0),0);
+  const kmT = P.reduce((a,b)=>a+(b.km||0),0);
+  const pct = Math.round(kmH/kmT*100);
+  const semH = P[idxHoy()].s;
+  const dRest = Math.max(0, Math.ceil((RACE-new Date())/86400000));
+
+  const sems = [];
+  for(let s=1;s<=12;s++){
+    const dd = P.filter(x=>x.s===s);
+    sems.push({s, km: dd.reduce((a,b)=>a+(b.km||0),0), fase: dd[0].fase});
+  }
+  const mx = Math.max(...sems.map(x=>x.km));
+
+  let h = `<div class="pg-hero">
+    <div class="pg-big">${pct}%</div>
+    <div class="pg-sub">del plan completado</div>
+    <div class="bar"><div class="bar-f" style="width:${pct}%"></div></div>
+  </div>`;
+
+  h += `<div class="grid2">
+    <div class="mini"><div class="mini-n" style="color:var(--moss)">${kmH}</div><div class="mini-l">km recorridos</div></div>
+    <div class="mini"><div class="mini-n" style="color:var(--mute)">${kmT-kmH}</div><div class="mini-l">km restantes</div></div>
+    <div class="mini"><div class="mini-n" style="color:var(--lake)">${semH}<span style="font-size:14px;color:var(--mute)">/12</span></div><div class="mini-l">semana actual</div></div>
+    <div class="mini"><div class="mini-n" style="color:var(--gold)">${dRest}</div><div class="mini-l">días para Chicago</div></div>
+  </div>`;
+
+  h += `<div class="eyebrow">Volumen semanal</div><div class="chart"><div class="bars">`;
+  sems.forEach(x => {
+    const cls = x.s < semH ? 'done' : x.s === semH ? 'now' : x.fase.includes('Taper') ? 'taper' : '';
+    h += `<div class="bcol ${cls}">
+      <div class="bval">${x.km}</div>
+      <div class="bfill" style="height:${x.km/mx*88}%"></div>
+      <div class="blab">${x.s}</div>
+    </div>`;
+  });
+  h += `</div></div>`;
+
+  h += `<div class="eyebrow">Ritmos objetivo — VDOT ${P[idxHoy()].v}</div><div class="blk">`;
+  const r = RITMOS[P[idxHoy()].v];
+  RIT_INFO.forEach(([k,n,d,c]) => {
+    h += `<div class="rit"><div class="rit-k">
+      <div class="rit-b" style="background:${c}22;color:${c}">${k}</div>
+      <div><div class="rit-n">${n}</div><div class="rit-d">${d}</div></div>
+    </div><div class="rit-v" style="color:${c}">${r[k]}</div></div>`;
+  });
+  h += `</div>`;
+
+  h += `<div class="eyebrow">Meta</div><div class="blk">
+    <div class="rit"><div class="rit-k"><div><div class="rit-n">VDOT objetivo</div><div class="rit-d">Predice 2:58:47</div></div></div><div class="rit-v" style="color:var(--gold)">54</div></div>
+    <div class="rit"><div class="rit-k"><div><div class="rit-n">Ritmo maratón</div><div class="rit-d">Sostener 42.2 km</div></div></div><div class="rit-v" style="color:var(--gold)">4:15</div></div>
+    <div class="rit"><div class="rit-k"><div><div class="rit-n">Tiempo meta</div><div class="rit-d">11 octubre 2026</div></div></div><div class="rit-v" style="color:var(--flag)">2:59</div></div>
+  </div>`;
+
+  document.getElementById('v-pro').innerHTML = h;
+}
+
+// ============ MODAL DIA ============
+function verDia(i){
+  const d = P[i], k = tipo(d), r = RITMOS[d.v];
+  let h = `<div class="hero ${k}" style="border:none;background:transparent;padding:0 0 16px">
+    <div class="h-meta"><span class="pill ${k}">${lbl(k)}</span><span class="h-date">${fmtF(d.f)}</span></div>
+    <div class="h-title">${d.t}</div>
+    <div class="h-detail">${d.det}</div>
+  </div>`;
+
+  if(d.km){
+    h += `<div class="blk"><div class="blk-h">Ritmos<span>VDOT ${d.v}</span></div>`;
+    RIT_INFO.forEach(([kk,n,ds,c]) => {
+      h += `<div class="rit"><div class="rit-k"><div class="rit-b" style="background:${c}22;color:${c}">${kk}</div>
+        <div><div class="rit-n">${n}</div></div></div><div class="rit-v" style="color:${c}">${r[kk]}</div></div>`;
+    });
+    h += `</div>`;
+  }
+
+  if(d.ej && d.ej.length){
+    h += `<div class="blk"><div class="blk-h">${d.ej[0].b||'Fuerza'}<span>${d.ej.length} ejercicios</span></div>`;
+    d.ej.forEach(e => {
+      h += `<div class="ex"><div class="ex-n"><div class="ex-name">${e.n}</div>${e.s?`<div class="ex-set">${e.s}</div>`:''}</div>
+        ${e.v?`<a class="ex-v" href="${e.v}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a>`:''}</div>`;
+    });
+    h += `</div>`;
+  }
+
+  h += `<div class="blk"><div class="blk-h">Nutrición</div><div class="nut">${
+    (d.nut||'').split('|').map(s=>s.trim()).filter(Boolean).map(s=>{
+      const p = s.split(':');
+      return p.length>1 ? `<b>${p[0]}:</b>${p.slice(1).join(':')}` : s;
+    }).join('<br>')
+  }</div></div>`;
+
+  document.getElementById('sheetC').innerHTML = h;
+  document.getElementById('ov').classList.add('on');
+}
+document.getElementById('ov').onclick = e => {
+  if(e.target.id === 'ov') e.currentTarget.classList.remove('on');
+};
+
+// ============ TABS ============
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    const v = t.dataset.v;
+    document.getElementById('v-'+v).classList.add('on');
+    if(v==='sem') renderSem();
+    if(v==='pro') renderPro();
+    window.scrollTo(0,0);
+  };
+});
+
+renderHoy();
+</script>
+</body>
+</html>
