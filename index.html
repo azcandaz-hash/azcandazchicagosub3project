@@ -487,14 +487,42 @@ function renderHoy(){
       ${isDone ? 'Completado' : 'Marcar completado'}
     </button>
     ${d.km > 0 ? `<div class="log">
-      <div class="log-t">Registrar datos reales</div>
+      <div class="log-t">Registrar datos reales (Garmin)</div>
       <div class="log-row">
         <div class="log-f"><label>km</label><input class="inp" id="lg-km" type="number" inputmode="decimal" step="0.1" placeholder="${(results[d.f]&&results[d.f].km)||d.km}"></div>
         <div class="log-f"><label>pace /km</label><input class="inp" id="lg-pace" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].pace)?fmtPace(results[d.f].pace):'530'}"></div>
         <div class="log-f"><label>FC prom</label><input class="inp" id="lg-hr" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].hr)||'145'}"></div>
       </div>
+      <div class="log-row" style="grid-template-columns:1fr">
+        <div class="log-f"><label>Calorías (Garmin)</label><input class="inp" id="lg-kcal" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].kcal)||'—'}"></div>
+      </div>
       <button class="w-save" style="width:100%" onclick="saveLog('${d.f}')">Guardar sesión</button>
-      ${results[d.f] ? `<div class="log-saved">✓ Registrado: ${results[d.f].km||d.km}km${results[d.f].pace?' · '+fmtPace(results[d.f].pace)+'/km':''}${results[d.f].hr?' · '+results[d.f].hr+' bpm':''}</div>` : ''}
+      ${results[d.f] ? `<div class="log-saved">✓ Registrado: ${results[d.f].km||d.km}km${results[d.f].pace?' · '+fmtPace(results[d.f].pace)+'/km':''}${results[d.f].hr?' · '+results[d.f].hr+' bpm':''}${results[d.f].kcal?' · '+results[d.f].kcal+' kcal':''}</div>` : ''}
+    </div>` : ''}
+    ${(d.t||'').includes('Zwift') ? `<div class="log">
+      <div class="log-t">Registrar datos reales (bici)</div>
+      <div class="log-row">
+        <div class="log-f"><label>km</label><input class="inp" id="lg-bkm" type="number" inputmode="decimal" step="0.1" placeholder="${(results[d.f]&&results[d.f].bkm)||'—'}"></div>
+        <div class="log-f"><label>W prom</label><input class="inp" id="lg-wavg" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].wavg)||'—'}"></div>
+        <div class="log-f"><label>W máx</label><input class="inp" id="lg-wmax" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].wmax)||'—'}"></div>
+      </div>
+      <div class="log-row">
+        <div class="log-f"><label>RPM prom</label><input class="inp" id="lg-rpm" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].rpm)||'—'}"></div>
+        <div class="log-f"><label>FC prom</label><input class="inp" id="lg-bhr" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].bhr)||'—'}"></div>
+        <div class="log-f"><label>Kcal</label><input class="inp" id="lg-bkcal" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].bkcal)||'—'}"></div>
+      </div>
+      <button class="w-save" style="width:100%" onclick="saveBici('${d.f}')">Guardar bici</button>
+      ${results[d.f]&&results[d.f].bkm ? `<div class="log-saved">✓ ${results[d.f].bkm}km · ${results[d.f].wavg||'—'}W avg · ${results[d.f].rpm||'—'}rpm · ${results[d.f].bhr||'—'}bpm · ${results[d.f].bkcal||'—'}kcal</div>` : ''}
+    </div>` : ''}
+    ${d.ej && d.ej.length ? `<div class="log">
+      <div class="log-t">Registrar gym (Garmin)</div>
+      <div class="log-row">
+        <div class="log-f"><label>FC prom</label><input class="inp" id="lg-ghr" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].ghr)||'—'}"></div>
+        <div class="log-f"><label>Kcal</label><input class="inp" id="lg-gkcal" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].gkcal)||'—'}"></div>
+        <div class="log-f"><label>Min</label><input class="inp" id="lg-gmin" type="number" inputmode="numeric" placeholder="${(results[d.f]&&results[d.f].gmin)||'—'}"></div>
+      </div>
+      <button class="w-save" style="width:100%" onclick="saveGym('${d.f}')">Guardar gym</button>
+      ${results[d.f]&&results[d.f].gkcal ? `<div class="log-saved">✓ Gym: ${results[d.f].ghr||'—'}bpm · ${results[d.f].gkcal||'—'}kcal · ${results[d.f].gmin||'—'}min</div>` : ''}
     </div>` : ''}
   </div>`;
 
@@ -606,19 +634,100 @@ function saveLog(f){
   const km = parseFloat(document.getElementById('lg-km').value);
   const pace = parsePace(document.getElementById('lg-pace').value);
   const hr = parseInt(document.getElementById('lg-hr').value);
+  const kcalEl = document.getElementById('lg-kcal');
+  const kcal = kcalEl ? parseInt(kcalEl.value) : NaN;
   const entry = {};
   if(km > 0) entry.km = km;
   if(pace) entry.pace = pace;
   if(hr > 60 && hr < 220) entry.hr = hr;
+  if(kcal > 0) entry.kcal = kcal;
   if(Object.keys(entry).length === 0) return;
   results[f] = Object.assign(results[f]||{}, entry);
   store.set('results', results);
   if(!done[f]){ done[f] = true; store.set('done', done); }
   renderHoy();
 }
+function saveBici(f){
+  const bkm = parseFloat(document.getElementById('lg-bkm').value);
+  const wavg = parseInt(document.getElementById('lg-wavg').value);
+  const wmax = parseInt(document.getElementById('lg-wmax').value);
+  const rpm = parseInt(document.getElementById('lg-rpm').value);
+  const bhr = parseInt(document.getElementById('lg-bhr').value);
+  const bkcal = parseInt(document.getElementById('lg-bkcal').value);
+  const entry = {};
+  if(bkm > 0) entry.bkm = bkm;
+  if(wavg > 0) entry.wavg = wavg;
+  if(wmax > 0) entry.wmax = wmax;
+  if(rpm > 0) entry.rpm = rpm;
+  if(bhr > 60 && bhr < 220) entry.bhr = bhr;
+  if(bkcal > 0) entry.bkcal = bkcal;
+  if(Object.keys(entry).length === 0) return;
+  results[f] = Object.assign(results[f]||{}, entry);
+  store.set('results', results);
+  if(!done[f]){ done[f] = true; store.set('done', done); }
+  renderHoy();
+}
+function saveGym(f){
+  const ghr = parseInt(document.getElementById('lg-ghr').value);
+  const gkcal = parseInt(document.getElementById('lg-gkcal').value);
+  const gmin = parseInt(document.getElementById('lg-gmin').value);
+  const entry = {};
+  if(ghr > 60 && ghr < 220) entry.ghr = ghr;
+  if(gkcal > 0) entry.gkcal = gkcal;
+  if(gmin > 0) entry.gmin = gmin;
+  if(Object.keys(entry).length === 0) return;
+  results[f] = Object.assign(results[f]||{}, entry);
+  store.set('results', results);
+  renderHoy();
+}
 function realKm(d){
   const r = results[d.f];
   return (r && r.km) ? r.km : (d.km || 0);
+}
+// Calorias reales del dia: suma de todo lo registrado (running+bici+gym); si no hay nada, null
+function realKcal(d){
+  const r = results[d.f];
+  if(!r) return null;
+  const v = (r.kcal||0) + (r.bkcal||0) + (r.gkcal||0);
+  return v > 0 ? v : null;
+}
+
+// Macros ajustados: compara gasto REAL (Garmin) vs ESTIMADO de los ultimos dias
+// registrados, calcula un factor de correccion y lo aplica al objetivo de HOY.
+// Si no hay suficientes registros recientes, usa el plan tal cual (sin ajuste).
+function factorAjuste(){
+  const hoy = hoyISO();
+  const pasados = P.filter(d => d.f < hoy && d.km !== undefined);
+  const conDato = pasados.filter(d => realKcal(d) !== null).slice(-5); // ultimos 5 dias con dato real
+  if(conDato.length < 2) return 1; // no hay suficiente info, no ajustar
+  let sumaReal = 0, sumaEst = 0;
+  conDato.forEach(d => {
+    sumaReal += realKcal(d);
+    sumaEst += d.nutri.gasto;
+  });
+  if(sumaEst <= 0) return 1;
+  let f = sumaReal / sumaEst;
+  return Math.max(0.85, Math.min(1.20, f)); // limitar el ajuste a +-15/20% para no desestabilizar
+}
+
+function macrosAjustados(d){
+  const n = d.nutri;
+  const f = factorAjuste();
+  if(Math.abs(f-1) < 0.03) return {...n, ajuste:null}; // diferencia menor a 3%, no vale la pena mostrar ajuste
+  const gastoAj = Math.round(n.gasto * f);
+  const kcalAj = Math.round(n.kcal * f);
+  // el ajuste se reparte proporcionalmente entre carbos y grasa (proteina se mantiene fija)
+  const kcalP = n.p*4;
+  const restoAj = kcalAj - kcalP;
+  const restoOrig = n.c*4 + n.g*9;
+  const ratio = restoOrig>0 ? restoAj/restoOrig : 1;
+  return {
+    tag: n.tag, cho_kg: Math.round((n.c*ratio/65)*10)/10,
+    kcal: kcalAj, p: n.p,
+    c: Math.round(n.c*ratio), g: Math.round(n.g*ratio),
+    gasto: gastoAj,
+    ajuste: f
+  };
 }
 
 // VDOT real: modelo fisiologico (formula VO2 de Daniels + %FC de reserva Karvonen)
@@ -980,11 +1089,16 @@ function macroRow(n){
 }
 
 function vistaDia(i, hoy){
-  const d = P[i], n = d.nutri, c = d.com;
+  const d = P[i], c = d.com;
+  const n = macrosAjustados(d);
   let h = `<div class="eyebrow">Hoy · ${fmtF(d.f)}</div>`;
   h += `<span class="tag-nut ${n.tag}">${n.tag}</span>`;
+  if(n.ajuste){
+    const pct = Math.round((n.ajuste-1)*100);
+    h += `<span class="vdot-live" style="margin-left:8px">⚡ Ajustado ${pct>0?'+':''}${pct}% con tu gasto real</span>`;
+  }
   h += macroRow(n);
-  h += `<div class="nut-note"><b>${n.cho_kg} g/kg de carbos</b> · Gasto estimado ${n.gasto} kcal<br>${c.nota}</div>`;
+  h += `<div class="nut-note"><b>${n.cho_kg} g/kg de carbos</b> · Gasto ${n.ajuste?'ajustado':'estimado'} ${n.gasto} kcal<br>${c.nota}</div>`;
   h += `<div class="eyebrow">Comidas</div>`;
   h += `<div class="meal d"><div class="meal-h"><div class="meal-t">Desayuno</div><div class="meal-hr">8:00</div></div><div class="meal-b">${c.des}</div></div>`;
   h += `<div class="meal c"><div class="meal-h"><div class="meal-t">Comida</div><div class="meal-hr">14:00–16:00</div></div><div class="meal-b">${c.com}</div></div>`;
